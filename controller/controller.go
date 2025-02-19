@@ -29,6 +29,10 @@ func (ctrl *Controller) GetMediaByTag(c echo.Context) error {
 	typ := c.QueryParam("type")
 	id := c.QueryParam("id")
 
+	if id == "" {
+		return fmt.Errorf("id is required")
+	}
+
 	if typ != "" && typ != IMDB && typ != TMDB && typ != TVDB {
 		return fmt.Errorf("invalid type: %s", typ)
 	}
