@@ -12,10 +12,12 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+const DefaultPlexDBFile = "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db"
+
 func main() {
 	pdp := os.Getenv("PLEX_DB_FILE")
 	if pdp == "" {
-		pdp = "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db"
+		pdp = DefaultPlexDBFile
 	}
 
 	_, err := os.Stat(pdp)
