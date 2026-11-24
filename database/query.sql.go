@@ -19,6 +19,8 @@ FROM media_parts mp
   INNER JOIN tags t ON tg.tag_id = t.id
 WHERE
   t.tag_type = 314 AND t.tag = ?
+  AND mi.deleted_at IS NULL
+  AND mp.deleted_at IS NULL
 `
 
 func (q *Queries) GetMediaByTag(ctx context.Context, tag sql.NullString) ([]sql.NullString, error) {

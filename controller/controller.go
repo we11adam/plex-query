@@ -1,12 +1,14 @@
 package controller
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"plex-query/database"
+	"net/http"
 	"strings"
+
+	"plex-query/database"
+
+	"github.com/labstack/echo/v4"
 )
 
 const (
@@ -30,11 +32,11 @@ func (ctrl *Controller) GetMediaByTag(c echo.Context) error {
 	id := c.QueryParam("id")
 
 	if id == "" {
-		return fmt.Errorf("id is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "id is required")
 	}
 
 	if typ != "" && typ != IMDB && typ != TMDB && typ != TVDB {
-		return fmt.Errorf("invalid type: %s", typ)
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid type: %s", typ))
 	}
 
 	if typ == "" {
@@ -47,17 +49,17 @@ func (ctrl *Controller) GetMediaByTag(c echo.Context) error {
 
 	tag := fmt.Sprintf("%s://%s", typ, id)
 
-	files, err := ctrl.queries.GetMediaByTag(context.TODO(), sql.NullString{String: tag, Valid: true})
+	files, err := ctrl.queries.GetMediaByTag(c.Request().Context(), sql.NullString{String: tag, Valid: true})
 	if err != nil {
-		return fmt.Errorf("failed to get media by tag: %v", err)
+		return fmt.Errorf("failed to get media by tag: %w", err)
 	}
 
-	var ret []string
+	ret := make([]string, 0, len(files))
 	for _, file := range files {
 		if file.Valid {
 			ret = append(ret, file.String)
 		}
 	}
 
-	return c.JSON(200, ret)
+	return c.JSON(http.StatusOK, ret)
 }

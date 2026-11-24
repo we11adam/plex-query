@@ -2,9 +2,11 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
+	"net/url"
 	"os"
+	"path/filepath"
+
 	"plex-query/controller"
 	"plex-query/database"
 	"plex-query/server"
@@ -13,6 +15,15 @@ import (
 )
 
 const DefaultPlexDBFile = "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db"
+
+func openPlexDB(path string) (*sql.DB, error) {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return nil, err
+	}
+	dsn := url.URL{Scheme: "file", Path: abs, RawQuery: "cache=shared&mode=ro"}
+	return sql.Open("sqlite", dsn.String())
+}
 
 func main() {
 	pdp := os.Getenv("PLEX_DB_FILE")
@@ -30,8 +41,7 @@ func main() {
 		port = "8080"
 	}
 
-	dsn := fmt.Sprintf("file:%s?cache=shared&mode=ro", pdp)
-	db, err := sql.Open("sqlite", dsn)
+	db, err := openPlexDB(pdp)
 	if err != nil {
 		log.Fatalf("failed to open Plex database: %v", err)
 	}

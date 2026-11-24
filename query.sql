@@ -6,4 +6,6 @@ FROM media_parts mp
   INNER JOIN taggings tg ON mi.metadata_item_id = tg.metadata_item_id
   INNER JOIN tags t ON tg.tag_id = t.id
 WHERE
-  t.tag_type = 314 AND t.tag = ?;
+  t.tag_type = 314 AND t.tag = ?
+  AND mi.deleted_at IS NULL
+  AND mp.deleted_at IS NULL;
